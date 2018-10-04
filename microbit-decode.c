@@ -15,15 +15,39 @@ decode_nibble (const gchar c)
 }
 
 static int
+decode_byte (const gchar *text, int offset)
+{
+    int n0 = decode_nibble (text[offset]);
+    if (n0 < 0)
+        return -1;
+    int n1 = decode_nibble (text[offset + 1]);
+    if (n1 < 0)
+        return -1;
+    return n0 << 4 | n1;
+}
+
+static GBytes *
+decode_bytes (const gchar *text, int offset, int length)
+{
+    guint8 *data;
+
+    data = malloc (length / 2);
+    for (int i = 0; i < length; i += 2)
+        data[i / 2] = decode_byte (text, offset + i);
+
+    return g_bytes_new_take (data, length / 2);
+}
+
+static int
 decode_integer_be (const gchar *text, int offset, int length)
 {
     int value = 0;
 
     for (int i = 0; i < length; i++) {
-        int n = decode_nibble (text[offset + i]);
-        if (n < 0)
+        int b = decode_byte (text, offset + i * 2);
+        if (b < 0)
             return -1;
-        value = (value << 4) + n;
+        value = (value << 8) + b;
     }
     return value;
 }
@@ -33,11 +57,11 @@ decode_integer_le (const gchar *text, int offset, int length)
 {
     int value = 0;
 
-    for (int i = length; i >= 0; i--) {
-        int n = decode_nibble (text[offset + i]);
-        if (n < 0)
+    for (int i = length - 1; i >= 0; i--) {
+        int b = decode_byte (text, offset + i * 2);
+        if (b < 0)
             return -1;
-        value = (value << 4) + n;
+        value = (value << 8) + b;
     }
     return value;
 }
@@ -81,14 +105,14 @@ int main (int argc, char **argv)
            g_printerr ("No enough space for record\n");
            return EXIT_FAILURE;
        }
-       int byte_count = decode_integer_be (record, 1, 2);
+       int byte_count = decode_byte (record, 1);
        int record_length = HEADER_LENGTH + byte_count * 2 + TRAILER_LENGTH;
        if (strlen (record) < record_length) {
            g_printerr ("No enough space for record\n");
            return EXIT_FAILURE;
        }
-       int address = address_offset + decode_integer_be (record, 3, 4);
-       int record_type = decode_integer_be (record, 7, 2);
+       int address = address_offset + decode_integer_be (record, 3, 2);
+       int record_type = decode_byte (record, 7);
        const gchar *record_data = record + HEADER_LENGTH;
 
        record += record_length;
@@ -100,10 +124,10 @@ int main (int argc, char **argv)
            /* PXT file record */
            if (byte_count == 16 && strncmp (record_data, "41140E2FB82FA2BB", 16) == 0) {
                json_header_address = address + 16;
-               json_header_length = decode_integer_le (record_data, 16, 4);
+               json_header_length = decode_integer_le (record_data, 16, 2);
                json_header = g_malloc0 (json_header_length + 1);
                text_address = json_header_address + json_header_length;
-               text_length = decode_integer_le (record_data, 20, 8);
+               text_length = decode_integer_le (record_data, 20, 4);
                text = g_malloc0 (text_length);
            }
 
@@ -114,7 +138,7 @@ int main (int argc, char **argv)
                if (n > n_remaining)
                    n = n_remaining;
                for (int i = 0; i < n; i++) {
-                   int byte = decode_integer_be (record_data, i * 2, 2);
+                   int byte = decode_byte (record_data, i * 2);
                    json_header[address - json_header_address + i] = byte;
                }
            }
@@ -124,7 +148,7 @@ int main (int argc, char **argv)
                if (n > n_remaining)
                    n = n_remaining;
                for (int i = 0; i < n; i++) {
-                   int byte = decode_integer_be (record_data, i * 2, 2);
+                   int byte = decode_byte (record_data, i * 2);
                    text[address - text_address + i] = byte;
                }
            }
@@ -138,14 +162,14 @@ int main (int argc, char **argv)
                g_printerr ("Extended linear address wrong size (%d, expecting 2)\n", byte_count);
                return EXIT_FAILURE;
            }
-           address_offset = decode_integer_be (record_data, 0, 4) << 16;
+           address_offset = decode_integer_be (record_data, 0, 2) << 16;
            break;
        case 5:
            if (byte_count != 4) {
                g_printerr ("Start linear address wrong size (%d, expecting 4)\n", byte_count);
                return EXIT_FAILURE;
            }
-           start_address = decode_integer_be (record_data, 0, 8);
+           start_address = decode_integer_be (record_data, 0, 4);
            //g_print ("START %08X\n", start_address);
            break;
        default:
