@@ -9,10 +9,11 @@
  * license.
  */
 
-#include <glib.h>
+#include <gtk/gtk.h>
 
 #include "mb-monitor.h"
 #include "mb-file.h"
+#include "mf-window.h"
 
 static void
 device_added_cb (MbMonitor *monitor, MbDevice *device)
@@ -29,7 +30,7 @@ device_removed_cb (MbMonitor *monitor, MbDevice *device)
 int
 main (int argc, char **argv)
 {
-    g_autoptr(GMainLoop) loop = g_main_loop_new (NULL, FALSE);
+    gtk_init (&argc, &argv);
 
     g_autoptr(MbFile) file = NULL;
     if (argc > 1) {
@@ -47,7 +48,10 @@ main (int argc, char **argv)
         device_added_cb (monitor, device);
     }
 
-    g_main_loop_run (loop);
+    MfWindow *window = mf_window_new ();
+    gtk_window_present (GTK_WINDOW (window));
+
+    gtk_main ();
 
     return EXIT_SUCCESS;
 }
