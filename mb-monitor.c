@@ -9,16 +9,18 @@ struct _MbMonitor
 
     GVolumeMonitor *volume_monitor;
     GUdevClient *udev_client;
-    GList *devices;
+    GPtrArray *devices;
 };
 
 G_DEFINE_TYPE (MbMonitor, mb_monitor, G_TYPE_OBJECT)
 
 static gboolean
-is_microbit (const gchar *path)
+is_microbit (GMount *mount)
 {
+    g_autoptr(GDrive) drive = g_mount_get_drive (mount);
+    g_autofree gchar *unix_device = g_drive_get_identifier (drive, G_VOLUME_IDENTIFIER_KIND_UNIX_DEVICE);
     g_autoptr(GUdevClient) client = g_udev_client_new (NULL);
-    g_autoptr(GUdevDevice) device = g_udev_client_query_by_device_file (client, path);
+    g_autoptr(GUdevDevice) device = g_udev_client_query_by_device_file (client, unix_device);
     const gchar *bus = g_udev_device_get_property (device, "ID_BUS");
     const gchar *vendor_id = g_udev_device_get_property (device, "ID_VENDOR_ID");
     const gchar *model_id = g_udev_device_get_property (device, "ID_MODEL_ID");
@@ -26,24 +28,34 @@ is_microbit (const gchar *path)
 }
 
 static void
-mount_is_microbit (GMount *mount)
-{
-    g_autoptr(GDrive) drive = g_mount_get_drive (mount);
-    g_autoptr(GFile) root = g_mount_get_root (mount);
-    g_autofree gchar *root_path = g_file_get_path (root);
-    g_autofree gchar *unix_device = g_drive_get_identifier (drive, G_VOLUME_IDENTIFIER_KIND_UNIX_DEVICE);
-    g_printerr ("%s (%s %s)\n", g_mount_get_name (mount), root_path, is_microbit (unix_device) ? "true" : "false");
-}
-
-static void
 mount_added_cb (MbMonitor *self, GMount *mount)
 {
-    mount_is_microbit (mount);
+    if (!is_microbit (mount))
+        return;
+
+    MbDevice *device = mb_device_new (mount);
+    g_ptr_array_add (self->devices, device);
+    g_printerr ("+microbit\n");
+}
+
+static MbDevice *
+find_device (MbMonitor *self, GMount *mount)
+{
+    for (int i = 0; i < self->devices->len; i++) {
+        MbDevice *device = g_ptr_array_index (self->devices, i);
+        if (mb_device_get_mount (device) == mount)
+            return device;
+    }
+
+    return NULL;
 }
 
 static void
 mount_removed_cb (MbMonitor *self, GMount *mount)
 {
+    MbDevice *device = find_device (self, mount);
+    if (device != NULL)
+        g_printerr ("-microbit\n");
 }
 
 void
@@ -54,6 +66,8 @@ mb_monitor_init (MbMonitor *self)
     g_signal_connect_object (self->volume_monitor, "mount-removed", G_CALLBACK (mount_removed_cb), self, G_CONNECT_SWAPPED);
 
     self->udev_client = g_udev_client_new (NULL);
+
+    self->devices = g_ptr_array_new_with_free_func (g_object_unref);
 
     GList *mounts = g_volume_monitor_get_mounts (self->volume_monitor);
     for (GList *link = mounts; link != NULL; link = link->next) {
@@ -69,7 +83,8 @@ mb_monitor_dispose (GObject *object)
     MbMonitor *self = MB_MONITOR (object);
 
     g_clear_object (&self->volume_monitor);
-    g_clear_object (&self->udev_client);   
+    g_clear_object (&self->udev_client);
+    g_clear_pointer (&self->devices, g_ptr_array_unref);
 
     G_OBJECT_CLASS (mb_monitor_parent_class)->dispose (object);
 }
@@ -86,4 +101,11 @@ MbMonitor *
 mb_monitor_new (void)
 {
     return g_object_new (mb_monitor_get_type (), NULL);
+}
+
+GPtrArray *
+mb_monitor_get_devices (MbMonitor *monitor)
+{
+    g_return_val_if_fail (MB_IS_MONITOR (monitor), NULL);
+    return monitor->devices;
 }
