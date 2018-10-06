@@ -13,12 +13,13 @@
 
 struct _MfWindow
 {
-    GtkWindow parent_instance;
+    GtkWindow     parent_instance;
 
-    GtkWidget *header_bar;
-    GtkWidget *flash_button;
+    GtkHeaderBar *header_bar;
+    GtkButton    *flash_button;
 
-    MbFile *file;
+    MbMonitor    *monitor;
+    MbFile       *file;
 };
 
 G_DEFINE_TYPE (MfWindow, mf_window, GTK_TYPE_WINDOW)
@@ -34,7 +35,16 @@ mf_window_dispose (GObject *object)
 {
     MfWindow *self = MF_WINDOW (object);
 
+    g_clear_object (&self->monitor);
+    g_clear_object (&self->file);
+
     G_OBJECT_CLASS (mf_window_parent_class)->dispose (object);
+}
+
+static void
+flash_cb (MfWindow *window)
+{
+    g_printerr ("flash\n");
 }
 
 void
@@ -49,22 +59,34 @@ mf_window_class_init (MfWindowClass *klass)
 
     gtk_widget_class_bind_template_child (widget_class, MfWindow, header_bar);
     gtk_widget_class_bind_template_child (widget_class, MfWindow, flash_button);
+    gtk_widget_class_bind_template_callback (widget_class, flash_cb);
+}
+
+static void
+devices_changed_cb (MfWindow *self)
+{
+    gtk_widget_set_sensitive (GTK_WIDGET (self->flash_button), mb_monitor_get_devices (self->monitor)->len > 0);
 }
 
 MfWindow *
-mf_window_new (void)
+mf_window_new (MbMonitor *monitor)
 {
-    return g_object_new (mf_window_get_type (), NULL);
+    MfWindow *self = g_object_new (mf_window_get_type (), NULL);
+    self->monitor = g_object_ref (monitor);
+    g_signal_connect_object (monitor, "device-added", G_CALLBACK (devices_changed_cb), self, G_CONNECT_SWAPPED);
+    g_signal_connect_object (monitor, "device-removed", G_CALLBACK (devices_changed_cb), self, G_CONNECT_SWAPPED);
+    devices_changed_cb (self);
+    return self;
 }
 
 void
-mf_window_set_file (MfWindow *window, MbFile *file)
+mf_window_set_file (MfWindow *self, MbFile *file)
 {
-    g_return_if_fail (MF_IS_WINDOW (window));
-    g_set_object (&window->file, file);
+    g_return_if_fail (MF_IS_WINDOW (self));
+    g_set_object (&self->file, file);
 
     const gchar *title = NULL;
-    if (window->file != NULL)
-        title = mb_file_get_name (window->file);
-    gtk_header_bar_set_title (window->header_bar, title);
+    if (self->file != NULL)
+        title = mb_file_get_name (self->file);
+    gtk_header_bar_set_title (self->header_bar, title);
 }

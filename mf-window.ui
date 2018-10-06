@@ -8,6 +8,7 @@
           <object class="GtkButton">
             <property name="visible">True</property>
             <property name="label" translatable="yes">Close</property>
+            <signal name="clicked" handler="gtk_main_quit"/>
           </object>
         </child>
         <child>
@@ -15,6 +16,7 @@
             <property name="visible">True</property>
             <property name="sensitive">False</property>
             <property name="label" translatable="yes">Flash</property>
+            <signal name="clicked" handler="flash_cb" swapped="true"/>
             <style>
               <class name="suggested-action"/>
             </style>
