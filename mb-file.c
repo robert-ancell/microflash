@@ -126,13 +126,13 @@ decode_hex_file (GFile *file, GCancellable *cancellable, gchar **header, GBytes 
     g_autofree gchar *contents = NULL;
     if (!g_file_load_contents (file, cancellable, &contents, NULL, NULL, error))
         return FALSE;
-   
+
     g_autofree gchar *json_header = NULL;
     guint32 json_header_address = 0;
     gsize json_header_length = 0;
     g_autofree guint8 *text = NULL;
     guint32 text_address = 0;
-    gsize text_length = 0;   
+    gsize text_length = 0;
 
     gchar *record = contents;
     guint32 address_offset = 0;
