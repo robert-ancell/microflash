@@ -12,6 +12,7 @@
 #include <glib.h>
 
 #include "mb-monitor.h"
+#include "mb-file.h"
 
 static void
 device_added_cb (MbMonitor *monitor, MbDevice *device)
@@ -29,6 +30,13 @@ int
 main (int argc, char **argv)
 {
     g_autoptr(GMainLoop) loop = g_main_loop_new (NULL, FALSE);
+
+    g_autoptr(MbFile) file = NULL;
+    if (argc > 1) {
+        g_autoptr(GFile) f = g_file_new_for_path (argv[1]);
+        file = mb_file_new (f);
+        g_printerr ("%s\n", mb_file_get_name (file));
+    }
 
     g_autoptr(MbMonitor) monitor = mb_monitor_new ();
     g_signal_connect (monitor, "device-added", G_CALLBACK (device_added_cb), NULL);

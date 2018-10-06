@@ -10,8 +10,59 @@
  */
 
 #include <ctype.h>
-#include <lzma.h>
-#include <glib.h>
+#include <json-glib/json-glib.h>
+
+#include "mb-file.h"
+
+struct _MbFile
+{
+    GObject parent_instance;
+
+    GFile *file;
+    gboolean loaded;
+    JsonObject *header;
+};
+
+G_DEFINE_TYPE (MbFile, mb_file, G_TYPE_OBJECT)
+
+void
+mb_file_init (MbFile *self)
+{
+}
+
+static void
+mb_file_dispose (GObject *object)
+{
+    MbFile *self = MB_FILE (object);
+
+    g_clear_object (&self->file);
+    g_clear_pointer (&self->header, json_object_unref);
+
+    G_OBJECT_CLASS (mb_file_parent_class)->dispose (object);
+}
+
+void
+mb_file_class_init (MbFileClass *klass)
+{
+    GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+    object_class->dispose = mb_file_dispose;
+}
+
+MbFile *
+mb_file_new (GFile *file)
+{
+    MbFile *f = g_object_new (mb_file_get_type (), NULL);
+    f->file = g_object_ref (file);
+    return f;
+}
+
+GFile *
+mb_file_get_file (MbFile *file)
+{
+    g_return_val_if_fail (MB_IS_FILE (file), NULL);
+    return file->file;
+}
 
 static int
 decode_nibble (const gchar c)
@@ -36,18 +87,6 @@ decode_byte (const gchar *text, int offset)
     if (n1 < 0)
         return -1;
     return n0 << 4 | n1;
-}
-
-static GBytes *
-decode_bytes (const gchar *text, int offset, int length)
-{
-    guint8 *data;
-
-    data = malloc (length / 2);
-    for (int i = 0; i < length; i += 2)
-        data[i / 2] = decode_byte (text, offset + i);
-
-    return g_bytes_new_take (data, length / 2);
 }
 
 static int
@@ -82,14 +121,11 @@ decode_integer_le (const gchar *text, int offset, int length)
 #define TRAILER_LENGTH 2
 
 static gboolean
-decode_hex_file (const gchar *filename, gchar **header, GBytes **source)
+decode_hex_file (GFile *file, GCancellable *cancellable, gchar **header, GBytes **source, GError **error)
 {
     g_autofree gchar *contents = NULL;
-    g_autoptr(GError) error = NULL;
-    if (!g_file_get_contents (filename, &contents, NULL, &error)) {
-        g_printerr ("Failed to load file: %s\n", error->message);
+    if (!g_file_load_contents (file, cancellable, &contents, NULL, NULL, error))
         return FALSE;
-    }
    
     g_autofree gchar *json_header = NULL;
     guint32 json_header_address = 0;
@@ -100,23 +136,25 @@ decode_hex_file (const gchar *filename, gchar **header, GBytes **source)
 
     gchar *record = contents;
     guint32 address_offset = 0;
-    guint32 start_address = 0;
     while (TRUE) {
        while (isspace (*record))
           record++;
 
        if (record[0] != ':') {
-           g_printerr ("Unexpected character '%c'\n", isprint (record[0]) ? record[0] : '?');
+           g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                        "Unexpected character '%c'", isprint (record[0]) ? record[0] : '?');
            return FALSE;
        }
        if (strlen (record) < HEADER_LENGTH) {
-           g_printerr ("No enough space for record\n");
+           g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                        "No enough space for record");
            return FALSE;
        }
        int byte_count = decode_byte (record, 1);
        int record_length = HEADER_LENGTH + byte_count * 2 + TRAILER_LENGTH;
        if (strlen (record) < record_length) {
-           g_printerr ("No enough space for record\n");
+           g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                        "No enough space for record");
            return FALSE;
        }
        int address = address_offset + decode_integer_be (record, 3, 2);
@@ -127,8 +165,6 @@ decode_hex_file (const gchar *filename, gchar **header, GBytes **source)
 
        switch (record_type) {
        case 0:
-           //g_print ("DATA %08X '%.*s'\n", address, byte_count * 2, record_data);
-
            /* PXT file record */
            if (byte_count == 16 && strncmp (record_data, "41140E2FB82FA2BB", 16) == 0) {
                json_header_address = address + 16;
@@ -157,85 +193,61 @@ decode_hex_file (const gchar *filename, gchar **header, GBytes **source)
            return TRUE;
        case 4:
            if (byte_count != 2) {
-               g_printerr ("Extended linear address wrong size (%d, expecting 2)\n", byte_count);
+               g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                            "Extended linear address wrong size (%d, expecting 2)", byte_count);
               return FALSE;
            }
            address_offset = decode_integer_be (record_data, 0, 2) << 16;
            break;
        case 5:
            if (byte_count != 4) {
-               g_printerr ("Start linear address wrong size (%d, expecting 4)\n", byte_count);
+               g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                            "Start linear address wrong size (%d, expecting 4)", byte_count);
                return FALSE;
            }
-           start_address = decode_integer_be (record_data, 0, 4);
-           //g_print ("START %08X\n", start_address);
+           //start_address = decode_integer_be (record_data, 0, 4);
            break;
        default:
-           g_printerr ("Unknown record type %d\n", record_type);
+           g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                        "Unknown record type %d", record_type);
            break;
        }
     }
 }
 
-static GBytes *
-lzma_decode (GBytes *input)
+static void
+load_header (MbFile *file)
 {
-    lzma_stream stream = LZMA_STREAM_INIT;
-    lzma_filter filters[2];
-    lzma_options_lzma options;
-    lzma_lzma_preset (&options, LZMA_PRESET_DEFAULT);
-    filters[0].id = LZMA_FILTER_LZMA1;
-    filters[0].options = &options;
-    filters[1].id = LZMA_VLI_UNKNOWN;
-    lzma_ret ret = lzma_raw_decoder (&stream, filters);
-    if (ret != LZMA_OK) {
-        g_printerr ("Failed to initialize LZMA decoder\n");
-        return NULL;
-    }
-    gsize data_length;
-    const uint8_t *data = g_bytes_get_data (input, &data_length);
-    stream.next_in = data;
-    stream.avail_in = data_length;
-    g_autoptr(GByteArray) output = g_byte_array_sized_new (data_length * 2);
-    while (TRUE) {
-        guint8 buffer[1024];
+    if (file->loaded)
+        return;
+    file->loaded = TRUE;
 
-        stream.next_out = buffer;
-        stream.avail_out = 1024;
-        int ret = lzma_code (&stream, LZMA_RUN);
-        if (ret == LZMA_STREAM_END) {
-            g_byte_array_ref (output);
-            return g_byte_array_free_to_bytes (output);
-        }
-        if (ret != LZMA_OK) {
-            g_printerr ("LZMA decoder error %d\n", ret);
-            return NULL;
-        }
-        g_byte_array_append (output, buffer, 1024 - stream.avail_out);
+    g_autofree gchar *header;
+    g_autoptr(GError) error = NULL;
+    if (!decode_hex_file (file->file, NULL, &header, NULL, &error))
+        return;
+
+    g_autoptr(JsonParser) parser = json_parser_new ();
+    if (!json_parser_load_from_data (parser, header, -1, &error)) {
+        g_warning ("Failed to parse PXT header: %s", error->message);
+        return;
     }
+
+    JsonNode *root = json_parser_get_root (parser);
+    if (!JSON_NODE_HOLDS_OBJECT (root)) {
+        g_warning ("PXT header is not an object");
+        return;
+    }
+
+    file->header = json_object_ref (json_node_get_object (root));
 }
 
-int
-main (int argc, char **argv)
+const gchar *
+mb_file_get_name (MbFile *file)
 {
-    if (argc < 2) {
-        g_printerr ("%s [filename.hex]\n", argv[0]);
-        return EXIT_FAILURE;
-    }
-
-    g_autofree gchar *header = NULL;
-    g_autoptr(GBytes) source = NULL;
-    if (!decode_hex_file (argv[1], &header, &source))
-        return EXIT_FAILURE;
-
-    g_file_set_contents ("output", g_bytes_get_data (source, NULL), g_bytes_get_size (source), NULL);
-
-    g_autoptr(GBytes) decoded_source = lzma_decode (source);
-    if (decoded_source == NULL)
-        return EXIT_FAILURE;
-
-    g_print ("%s\n", header);
-    g_print ("%.*s\n", (int) g_bytes_get_size (decoded_source), (gchar *) g_bytes_get_data (decoded_source, NULL));
-
-    return EXIT_SUCCESS;
+    g_return_val_if_fail (MB_IS_FILE (file), NULL);
+    load_header (file);
+    if (file->header == NULL || !json_object_has_member (file->header, "name"))
+        return NULL;
+    return json_object_get_string_member (file->header, "name");
 }
