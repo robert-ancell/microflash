@@ -28,9 +28,21 @@
       </object>
     </child>
     <child>
-      <object class="GtkImage">
+      <object class="GtkStack" id="device_stack">
         <property name="visible">True</property>
-        <property name="resource">/com/github/robert-ancell/microflash/microbit.png</property>
+        <property name="transition_type">crossfade</property>
+        <child>
+          <object class="GtkLabel" id="not_detected_label">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">No micro:bit detected</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkImage" id="device_image">
+            <property name="visible">True</property>
+            <property name="resource">/com/github/robert-ancell/microflash/microbit.png</property>
+          </object>
+        </child>
       </object>
     </child>
   </template>

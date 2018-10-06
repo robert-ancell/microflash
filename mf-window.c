@@ -17,6 +17,9 @@ struct _MfWindow
 
     GtkHeaderBar *header_bar;
     GtkButton    *flash_button;
+    GtkStack     *device_stack;
+    GtkLabel     *not_detected_label;
+    GtkImage     *device_image;
 
     MbMonitor    *monitor;
     MbFile       *file;
@@ -59,13 +62,18 @@ mf_window_class_init (MfWindowClass *klass)
 
     gtk_widget_class_bind_template_child (widget_class, MfWindow, header_bar);
     gtk_widget_class_bind_template_child (widget_class, MfWindow, flash_button);
+    gtk_widget_class_bind_template_child (widget_class, MfWindow, device_stack);
+    gtk_widget_class_bind_template_child (widget_class, MfWindow, not_detected_label);
+    gtk_widget_class_bind_template_child (widget_class, MfWindow, device_image);
     gtk_widget_class_bind_template_callback (widget_class, flash_cb);
 }
 
 static void
 devices_changed_cb (MfWindow *self)
 {
-    gtk_widget_set_sensitive (GTK_WIDGET (self->flash_button), self->file != NULL && mb_monitor_get_devices (self->monitor)->len > 0);
+    gboolean have_devices = mb_monitor_get_devices (self->monitor)->len > 0;
+    gtk_widget_set_sensitive (GTK_WIDGET (self->flash_button), self->file != NULL && have_devices);
+    gtk_stack_set_visible_child (self->device_stack, have_devices ? GTK_WIDGET (self->device_image) : GTK_WIDGET (self->not_detected_label));
 }
 
 MfWindow *
