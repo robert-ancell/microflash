@@ -3,7 +3,7 @@
 struct _MbDevice
 {
     GObject parent_instance;
-   
+
     GMount *mount;
 };
 

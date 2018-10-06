@@ -3,6 +3,14 @@
 
 #include "mb-monitor.h"
 
+enum
+{
+    DEVICE_ADDED,
+    DEVICE_REMOVED,
+    LAST_SIGNAL
+};
+static guint signals[LAST_SIGNAL] = { 0 };
+
 struct _MbMonitor
 {
     GObject parent_instance;
@@ -35,7 +43,8 @@ mount_added_cb (MbMonitor *self, GMount *mount)
 
     MbDevice *device = mb_device_new (mount);
     g_ptr_array_add (self->devices, device);
-    g_printerr ("+microbit\n");
+
+    g_signal_emit (self, signals[DEVICE_ADDED], 0, device);
 }
 
 static MbDevice *
@@ -54,8 +63,12 @@ static void
 mount_removed_cb (MbMonitor *self, GMount *mount)
 {
     MbDevice *device = find_device (self, mount);
-    if (device != NULL)
-        g_printerr ("-microbit\n");
+    if (device == NULL)
+        return;
+
+    g_autoptr(MbDevice) d = g_object_ref (device);
+    g_ptr_array_remove (self->devices, device);
+    g_signal_emit (self, signals[DEVICE_REMOVED], 0, d);
 }
 
 void
@@ -93,6 +106,18 @@ void
 mb_monitor_class_init (MbMonitorClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+    signals[DEVICE_ADDED] = g_signal_new ("device-added",
+                                          G_TYPE_FROM_CLASS (object_class),
+                                          G_SIGNAL_RUN_LAST,
+                                          0, NULL, NULL, NULL,
+                                          G_TYPE_NONE, 1, mb_device_get_type ());
+    signals[DEVICE_REMOVED] = g_signal_new ("device-removed",
+                                            G_TYPE_FROM_CLASS (object_class),
+                                            G_SIGNAL_RUN_LAST,
+                                            0, NULL, NULL, NULL,
+                                            G_TYPE_NONE, 1, mb_device_get_type ());
+
 
     object_class->dispose = mb_monitor_dispose;
 }
