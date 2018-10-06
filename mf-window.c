@@ -65,7 +65,7 @@ mf_window_class_init (MfWindowClass *klass)
 static void
 devices_changed_cb (MfWindow *self)
 {
-    gtk_widget_set_sensitive (GTK_WIDGET (self->flash_button), mb_monitor_get_devices (self->monitor)->len > 0);
+    gtk_widget_set_sensitive (GTK_WIDGET (self->flash_button), self->file != NULL && mb_monitor_get_devices (self->monitor)->len > 0);
 }
 
 MfWindow *
