@@ -32,11 +32,12 @@ main (int argc, char **argv)
 {
     gtk_init (&argc, &argv);
 
-    g_autoptr(MbFile) file = NULL;
+    MfWindow *window = mf_window_new ();
+
     if (argc > 1) {
         g_autoptr(GFile) f = g_file_new_for_path (argv[1]);
-        file = mb_file_new (f);
-        g_printerr ("%s\n", mb_file_get_name (file));
+        g_autoptr(MbFile) file = mb_file_new (f);
+        mf_window_set_file (window, file);
     }
 
     g_autoptr(MbMonitor) monitor = mb_monitor_new ();
@@ -48,7 +49,6 @@ main (int argc, char **argv)
         device_added_cb (monitor, device);
     }
 
-    MfWindow *window = mf_window_new ();
     gtk_window_present (GTK_WINDOW (window));
 
     gtk_main ();

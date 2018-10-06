@@ -13,10 +13,15 @@
 
 #include <gtk/gtk.h>
 
+#include "mb-file.h"
+
 G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (MfWindow, mf_window, MF, WINDOW, GtkWindow)
 
-MfWindow *mf_window_new (void);
+MfWindow *mf_window_new      (void);
+
+void      mf_window_set_file (MfWindow *window,
+                              MbFile   *file);
 
 G_END_DECLS

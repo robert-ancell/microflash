@@ -1,5 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <template class="MfWindow" parent="GtkWindow">
+    <child type="titlebar">
+      <object class="GtkHeaderBar" id="header_bar">
+        <property name="visible">True</property>
+        <child>
+          <object class="GtkButton">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">Close</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="flash_button">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="label" translatable="yes">Flash</property>
+            <style>
+              <class name="suggested-action"/>
+            </style>
+          </object>
+          <packing>
+            <property name="pack-type">end</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImage">
+        <property name="visible">True</property>
+        <property name="resource">/com/github/robert-ancell/microflash/microbit.png</property>
+      </object>
+    </child>
   </template>
 </interface>

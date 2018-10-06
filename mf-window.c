@@ -14,6 +14,11 @@
 struct _MfWindow
 {
     GtkWindow parent_instance;
+
+    GtkWidget *header_bar;
+    GtkWidget *flash_button;
+
+    MbFile *file;
 };
 
 G_DEFINE_TYPE (MfWindow, mf_window, GTK_TYPE_WINDOW)
@@ -42,11 +47,24 @@ mf_window_class_init (MfWindowClass *klass)
 
     gtk_widget_class_set_template_from_resource (widget_class, "/com/github/robert-ancell/microflash/mf-window.ui");
 
-    //gtk_widget_class_bind_template_child_private (widget_class, MfWindow, );
+    gtk_widget_class_bind_template_child (widget_class, MfWindow, header_bar);
+    gtk_widget_class_bind_template_child (widget_class, MfWindow, flash_button);
 }
 
 MfWindow *
 mf_window_new (void)
 {
     return g_object_new (mf_window_get_type (), NULL);
+}
+
+void
+mf_window_set_file (MfWindow *window, MbFile *file)
+{
+    g_return_if_fail (MF_IS_WINDOW (window));
+    g_set_object (&window->file, file);
+
+    const gchar *title = NULL;
+    if (window->file != NULL)
+        title = mb_file_get_name (window->file);
+    gtk_header_bar_set_title (window->header_bar, title);
 }

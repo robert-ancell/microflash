@@ -2,5 +2,6 @@
 <gresources>
  <gresource prefix="/com/github/robert-ancell/microflash">
   <file preprocess="xml-stripblanks">mf-window.ui</file>
+  <file>microbit.png</file>
  </gresource>
 </gresources>
