@@ -222,7 +222,7 @@ load_header (MbFile *file)
         return;
     file->loaded = TRUE;
 
-    g_autofree gchar *header;
+    g_autofree gchar *header = NULL;
     g_autoptr(GError) error = NULL;
     if (!decode_hex_file (file->file, NULL, &header, NULL, &error))
         return;
