@@ -55,14 +55,14 @@ mf_window_dispose (GObject *object)
 static void
 flash_copied_cb (GObject *object, GAsyncResult *result, gpointer user_data)
 {
-    //MfWindow *self = user_data;
-
     g_autoptr(GError) error = NULL;
     if (!g_file_copy_finish (G_FILE (object), result, &error)) {
         if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
            g_warning ("Failed to flash file: %s", error->message);
         return;
     }
+
+    gtk_main_quit ();
 }
 
 static void
