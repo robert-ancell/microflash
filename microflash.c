@@ -15,6 +15,16 @@
 #include "mb-file.h"
 #include "mf-window.h"
 
+static GFile *
+file_from_uri_or_path (const gchar *uri_or_path)
+{
+    g_autofree gchar *scheme = g_uri_parse_scheme (uri_or_path);
+    if (scheme != NULL)
+        return g_file_new_for_uri (uri_or_path);
+    else
+        return g_file_new_for_path (uri_or_path);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -25,7 +35,7 @@ main (int argc, char **argv)
     MfWindow *window = mf_window_new (monitor);
 
     if (argc > 1) {
-        g_autoptr(GFile) f = g_file_new_for_path (argv[1]);
+        g_autoptr(GFile) f = file_from_uri_or_path (argv[1]);
         g_autoptr(MbFile) file = mb_file_new (f);
         mf_window_set_file (window, file);
     }
