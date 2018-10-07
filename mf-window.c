@@ -18,7 +18,7 @@ struct _MfWindow
     GtkHeaderBar *header_bar;
     GtkButton    *flash_button;
     GtkStack     *device_stack;
-    GtkLabel     *not_detected_label;
+    GtkBox       *not_detected_box;
     GtkImage     *device_image;
 
     GCancellable *cancellable;
@@ -93,7 +93,7 @@ mf_window_class_init (MfWindowClass *klass)
     gtk_widget_class_bind_template_child (widget_class, MfWindow, header_bar);
     gtk_widget_class_bind_template_child (widget_class, MfWindow, flash_button);
     gtk_widget_class_bind_template_child (widget_class, MfWindow, device_stack);
-    gtk_widget_class_bind_template_child (widget_class, MfWindow, not_detected_label);
+    gtk_widget_class_bind_template_child (widget_class, MfWindow, not_detected_box);
     gtk_widget_class_bind_template_child (widget_class, MfWindow, device_image);
     gtk_widget_class_bind_template_callback (widget_class, flash_cb);
 }
@@ -106,7 +106,7 @@ devices_changed_cb (MfWindow *self)
     if (devices->len > 0)
         self->device = g_object_ref (g_ptr_array_index (devices, 0));
     gtk_widget_set_sensitive (GTK_WIDGET (self->flash_button), self->file != NULL && self->device != NULL);
-    gtk_stack_set_visible_child (self->device_stack, self->device != NULL ? GTK_WIDGET (self->device_image) : GTK_WIDGET (self->not_detected_label));
+    gtk_stack_set_visible_child (self->device_stack, self->device != NULL ? GTK_WIDGET (self->device_image) : GTK_WIDGET (self->not_detected_box));
 }
 
 MfWindow *

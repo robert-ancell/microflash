@@ -32,9 +32,31 @@
         <property name="visible">True</property>
         <property name="transition_type">crossfade</property>
         <child>
-          <object class="GtkLabel" id="not_detected_label">
+          <object class="GtkBox" id="not_detected_box">
             <property name="visible">True</property>
-            <property name="label" translatable="yes">No micro:bit detected</property>
+            <property name="valign">center</property>
+            <property name="margin">24</property>
+            <property name="spacing">12</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">No micro:bit detected</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                  <attribute name="scale" value="1.4"/>
+                </attributes>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="wrap">True</property>
+                <property name="justify">center</property>
+                <property name="max_width_chars">40</property>
+                <property name="label" translatable="yes">Please connect your micro:bit to this computer using a USB cable</property>
+              </object>
+            </child>
           </object>
         </child>
         <child>
