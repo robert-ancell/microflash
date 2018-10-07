@@ -1,5 +1,5 @@
 project ('microflash', 'c',
-          meson_version: '>= 0.37.1')
+          meson_version: '>= 0.46.0')
 
 gnome = import ('gnome')
 
@@ -27,3 +27,7 @@ executable ('microflash',
 
 install_data ('microflash.desktop',
               install_dir: join_paths (get_option ('prefix'), get_option ('datadir'), 'applications'))
+
+install_data ('microflash.mime.xml',
+              rename: 'microflash.xml',
+              install_dir: join_paths (get_option ('prefix'), get_option ('datadir'), 'mime', 'packages'))

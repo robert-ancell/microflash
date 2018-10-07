@@ -5,3 +5,4 @@ Keywords=micro;bit;flash;program;download;usb
 Exec=microflash %u
 Type=Application
 Categories=Development;Education;
+MimeType=application/intel-hex;

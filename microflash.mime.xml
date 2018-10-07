@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/intel-hex">
+    <comment>Intel HEX file</comment>
+    <sub-class-of type="text/plain"/>
+    <magic priority="50">
+      <match type="string" value=":" offset="0"/>
+    </magic>
+    <glob pattern="*.hex"/>
+  </mime-type>
+</mime-info>
