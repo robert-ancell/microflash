@@ -25,6 +25,8 @@ struct _MfWindow
     MbMonitor    *monitor;
     MbFile       *file;
     MbDevice     *device;
+
+    gboolean      flashing;
 };
 
 G_DEFINE_TYPE (MfWindow, mf_window, GTK_TYPE_WINDOW)
@@ -53,16 +55,30 @@ mf_window_dispose (GObject *object)
 }
 
 static void
+update_state (MfWindow *self)
+{
+    gtk_widget_set_sensitive (GTK_WIDGET (self->flash_button), self->file != NULL && self->device != NULL && !self->flashing);
+    gtk_stack_set_visible_child (self->device_stack, self->device != NULL ? GTK_WIDGET (self->device_image) : GTK_WIDGET (self->not_detected_box));
+}
+
+static void
 flash_copied_cb (GObject *object, GAsyncResult *result, gpointer user_data)
 {
+    MfWindow *self = user_data;
+
     g_autoptr(GError) error = NULL;
-    if (!g_file_copy_finish (G_FILE (object), result, &error)) {
+    gboolean r = g_file_copy_finish (G_FILE (object), result, &error);
+
+    self->flashing = FALSE;
+    update_state (self);
+
+    if (r) {
+        gtk_main_quit ();
+        return;
+    } else {
         if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
            g_warning ("Failed to flash file: %s", error->message);
-        return;
     }
-
-    gtk_main_quit ();
 }
 
 static void
@@ -78,6 +94,9 @@ flash_cb (MfWindow *self)
                        self->cancellable,
                        NULL, NULL,
                        flash_copied_cb, self);
+
+    self->flashing = TRUE;
+    update_state (self);
 }
 
 void
@@ -105,8 +124,7 @@ devices_changed_cb (MfWindow *self)
     GPtrArray *devices = mb_monitor_get_devices (self->monitor);
     if (devices->len > 0)
         self->device = g_object_ref (g_ptr_array_index (devices, 0));
-    gtk_widget_set_sensitive (GTK_WIDGET (self->flash_button), self->file != NULL && self->device != NULL);
-    gtk_stack_set_visible_child (self->device_stack, self->device != NULL ? GTK_WIDGET (self->device_image) : GTK_WIDGET (self->not_detected_box));
+    update_state (self);
 }
 
 MfWindow *
