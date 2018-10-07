@@ -22,6 +22,7 @@ executable ('microflash',
               'mb-file.c',
               'mb-monitor.c',
               'mf-window.c' ] + resources,
+            install: true,
             dependencies: [ glib_dep, gio_dep, gudev_dep, json_glib_dep, gtk_dep ])
 
 
