@@ -25,5 +25,5 @@ executable ('microflash',
             install: true,
             dependencies: [ glib_dep, gio_dep, gudev_dep, json_glib_dep, gtk_dep ])
 
-
-
+install_data ('microflash.desktop',
+              install_dir: join_paths (get_option ('prefix'), get_option ('datadir'), 'applications'))

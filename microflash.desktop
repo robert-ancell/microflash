@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Microflash
+Comment=Flash programs to your micro:bit
+Keywords=micro;bit;flash;program;download;usb
+Exec=microflash %u
+Type=Application
+Categories=Development;Education;
