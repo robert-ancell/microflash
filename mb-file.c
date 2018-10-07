@@ -224,8 +224,10 @@ load_header (MbFile *file)
 
     g_autofree gchar *header = NULL;
     g_autoptr(GError) error = NULL;
-    if (!decode_hex_file (file->file, NULL, &header, NULL, &error))
+    if (!decode_hex_file (file->file, NULL, &header, NULL, &error)) {
+        g_warning ("Failed to parse HEX file: %s", error->message);
         return;
+    }
 
     g_autoptr(JsonParser) parser = json_parser_new ();
     if (!json_parser_load_from_data (parser, header, -1, &error)) {

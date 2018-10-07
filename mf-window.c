@@ -147,6 +147,9 @@ mf_window_set_file (MfWindow *self, MbFile *file)
     const gchar *title = NULL;
     if (self->file != NULL)
         title = mb_file_get_name (self->file);
+    if (title == NULL)
+        title = g_file_get_basename (mb_file_get_file (self->file));
+
     gtk_header_bar_set_title (self->header_bar, title);
 
     devices_changed_cb (self);
