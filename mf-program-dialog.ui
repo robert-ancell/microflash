@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="MfProgramDialog" parent="GtkFileChooserDialog">
+    <child type="titlebar">
+      <object class="GtkHeaderBar">
+        <property name="title" translatable="yes">Select Program</property>
+        <property name="visible">True</property>
+        <child>
+          <object class="GtkButton" id="cancel_button">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">Cancel</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="select_button">
+            <property name="visible">True</property>
+            <property name="can_default">True</property>
+            <property name="label" translatable="yes">Select</property>
+          </object>
+          <packing>
+            <property name="pack-type">end</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="accept" default="true">select_button</action-widget>
+      <action-widget response="cancel">cancel_button</action-widget>
+    </action-widgets>
+  </template>
+  <object class="GtkFileFilter" id="hex_filter">
+    <mime-types>
+      <mime-type>application/intel-hex</mime-type>
+    </mime-types>
+  </object>
+  <object class="GtkFileFilter" id="all_filter">
+    <patterns>
+      <pattern>*</pattern>
+    </patterns>
+  </object>
+</interface>

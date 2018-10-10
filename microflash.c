@@ -13,6 +13,7 @@
 
 #include "mb-monitor.h"
 #include "mb-file.h"
+#include "mf-program-dialog.h"
 #include "mf-window.h"
 
 static GFile *
@@ -34,29 +35,20 @@ main (int argc, char **argv)
 
     MfWindow *window = mf_window_new (monitor);
 
-    g_autoptr(GFile) f = NULL;
+    g_autoptr(MbFile) file = NULL;
     if (argc > 1) {
-        f = file_from_uri_or_path (argv[1]);
+        g_autoptr(GFile) f = file_from_uri_or_path (argv[1]);
+        file = mb_file_new (f);
     } else {
-        GtkWidget *dialog = gtk_file_chooser_dialog_new ("Select Program", NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
-                                                         "Select", GTK_RESPONSE_OK, NULL);
-        GtkFileFilter *hex_filter = gtk_file_filter_new ();
-        gtk_file_filter_set_name (hex_filter, "HEX Files");
-        gtk_file_filter_add_mime_type (hex_filter, "application/intel-hex");
-        gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), hex_filter);
-        GtkFileFilter *all_filter = gtk_file_filter_new ();
-        gtk_file_filter_set_name (all_filter, "All Files");
-        gtk_file_filter_add_pattern (all_filter, "*");
-        gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), all_filter);
+        MfProgramDialog *dialog = mf_program_dialog_new ();
 
-        if (gtk_dialog_run (GTK_DIALOG (dialog)) != GTK_RESPONSE_OK)
+        if (gtk_dialog_run (GTK_DIALOG (dialog)) != GTK_RESPONSE_ACCEPT)
             return EXIT_SUCCESS;
 
-        f = gtk_file_chooser_get_file (GTK_FILE_CHOOSER (dialog));
-        gtk_widget_destroy (dialog);
+        file = mf_program_dialog_get_file (dialog);
+        gtk_widget_destroy (GTK_WIDGET (dialog));
     }
 
-    g_autoptr(MbFile) file = mb_file_new (f);
     mf_window_set_file (window, file);
 
     gtk_window_present (GTK_WINDOW (window));
