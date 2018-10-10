@@ -9,6 +9,8 @@
  * license.
  */
 
+#include <glib/gi18n.h>
+
 #include "mf-program-dialog.h"
 
 struct _MfProgramDialog
@@ -30,9 +32,9 @@ mf_program_dialog_init (MfProgramDialog *self)
      * https://gitlab.gnome.org/GNOME/gtk/merge_requests/376
      * https://gitlab.gnome.org/GNOME/gtk/merge_requests/380
      */
-    gtk_file_filter_set_name (self->hex_filter, "HEX Files");
+    gtk_file_filter_set_name (self->hex_filter, _("HEX Files"));
     gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (self), self->hex_filter);
-    gtk_file_filter_set_name (self->all_filter, "All Files");
+    gtk_file_filter_set_name (self->all_filter, _("All Files"));
     gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (self), self->all_filter);
 }
 

@@ -1,0 +1,5 @@
+mf-program-dialog.c
+mf-program-dialog.ui
+mf-window.ui
+microflash.desktop.in
+microflash.mime.xml.in

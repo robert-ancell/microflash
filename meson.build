@@ -2,6 +2,9 @@ project ('microflash', 'c',
           meson_version: '>= 0.46.0')
 
 gnome = import ('gnome')
+i18n = import ('i18n')
+
+datadir = join_paths (get_option ('prefix'), get_option ('datadir'))
 
 glib_dep = dependency ('glib-2.0')
 gio_dep = dependency ('gio-2.0')
@@ -26,9 +29,21 @@ executable ('microflash',
             install: true,
             dependencies: [ glib_dep, gio_dep, gudev_dep, json_glib_dep, gtk_dep ])
 
-install_data ('microflash.desktop',
-              install_dir: join_paths (get_option ('prefix'), get_option ('datadir'), 'applications'))
+i18n.merge_file ('desktop-file',
+                 input: 'microflash.desktop.in',
+                 output: 'microflash.desktop',
+                 install: true,
+                 install_dir: join_paths (datadir, 'applications'),
+                 po_dir: 'po',
+                 type: 'desktop')
 
-install_data ('microflash.mime.xml',
-              rename: 'microflash.xml',
-              install_dir: join_paths (get_option ('prefix'), get_option ('datadir'), 'mime', 'packages'))
+i18n.merge_file ('mime-file',
+                 input: 'microflash.mime.xml.in',
+                 output: 'microflash.xml',
+                 install: true,
+                 install_dir: join_paths (datadir, 'mime', 'packages'),
+                 po_dir: 'po',
+                 data_dirs: '.',
+                 type: 'xml')
+
+subdir ('po')
