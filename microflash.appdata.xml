@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>microflash.desktop</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0+</project_license>
+  <name>Microflash</name>
+  <summary>Flash programs to your micro:bit</summary>
+  <description>
+    <p>
+      A graphical application to flash programs to the micro:bit.
+      If you install Microflash after downloading a .hex file you will be able to download it to the micro:bit in one click.
+    </p>
+  </description>
+  <url type="homepage">https://github.com/robert-ancell/microflash</url>
+  <update_contact>robert.ancell_AT_gmail.com</update_contact>
+  <translation type="gettext">microflash</translation>
+</component>

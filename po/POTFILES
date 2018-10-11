@@ -1,5 +1,6 @@
 src/mf-program-dialog.c
 src/mf-program-dialog.ui
 src/mf-window.ui
+microflash.appdata.xml
 microflash.desktop
 microflash.mime.xml

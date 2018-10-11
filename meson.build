@@ -12,6 +12,13 @@ gudev_dep = dependency ('gudev-1.0')
 json_glib_dep = dependency ('json-glib-1.0')
 gtk_dep = dependency ('gtk+-3.0')
 
+i18n.merge_file ('appdata-file',
+                 input: 'microflash.appdata.xml',
+                 output: 'microflash.appdata.xml',
+                 install: true,
+                 install_dir: join_paths (datadir, 'metainfo'),
+                 po_dir: 'po')
+
 i18n.merge_file ('desktop-file',
                  input: 'microflash.desktop',
                  output: 'microflash.desktop',
