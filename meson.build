@@ -13,7 +13,7 @@ json_glib_dep = dependency ('json-glib-1.0')
 gtk_dep = dependency ('gtk+-3.0')
 
 i18n.merge_file ('desktop-file',
-                 input: 'microflash.desktop.in',
+                 input: 'microflash.desktop',
                  output: 'microflash.desktop',
                  install: true,
                  install_dir: join_paths (datadir, 'applications'),
@@ -21,7 +21,7 @@ i18n.merge_file ('desktop-file',
                  type: 'desktop')
 
 i18n.merge_file ('mime-file',
-                 input: 'microflash.mime.xml.in',
+                 input: 'microflash.mime.xml',
                  output: 'microflash.xml',
                  install: true,
                  install_dir: join_paths (datadir, 'mime', 'packages'),
