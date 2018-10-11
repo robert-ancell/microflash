@@ -1,0 +1,19 @@
+Source: microflash
+Section: gnome
+Priority: optional
+Maintainer: Robert Ancell <robert.ancell@gmail.com>
+Standards-Version: 4.1.1
+Build-Depends: debhelper,
+               libglib2.0-dev,
+               libgtk-3-dev,
+               libgudev-1.0-dev,
+               libjson-glib-dev,
+               meson
+Homepage: https://github.com/robert-ancell/microflash
+
+Package: microflash
+Architecture: any
+Depends: ${misc:Depends},
+         ${shlibs:Depends}
+Description: micro:bit flashing tool
+ Microflash is a tool to flash programs to a micro:bit.
