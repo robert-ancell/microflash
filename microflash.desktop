@@ -1,8 +1,9 @@
 [Desktop Entry]
+Type=Application
 Name=Microflash
 Comment=Flash programs to your micro:bit
 Keywords=micro;bit;flash;program;download;usb
-Exec=microflash %u
-Type=Application
+Icon=microflash
 Categories=Development;Education;
 MimeType=application/intel-hex;
+Exec=microflash %u

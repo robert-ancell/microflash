@@ -29,5 +29,8 @@ i18n.merge_file ('mime-file',
                  data_dirs: '.',
                  type: 'xml')
 
+install_data ('microflash.png',
+              install_dir: join_paths (datadir, 'icons', 'hicolor', '256x256', 'apps'))
+
 subdir ('po')
 subdir ('src')
