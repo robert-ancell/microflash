@@ -9,6 +9,7 @@
  * license.
  */
 
+#include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
 #include "mb-monitor.h"
@@ -29,6 +30,10 @@ file_from_uri_or_path (const gchar *uri_or_path)
 int
 main (int argc, char **argv)
 {
+    bindtextdomain ("microflash", LOCALE_DIR);
+    bind_textdomain_codeset ("microflash", "UTF-8");
+    textdomain ("microflash");
+
     gtk_init (&argc, &argv);
 
     g_autoptr(MbMonitor) monitor = mb_monitor_new ();
