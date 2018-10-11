@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/robert-ancell/microflash.svg?branch=master)](https://travis-ci.org/robert-ancell/microflash)
+
 This is the source code to *Microflash* — a graphical application to
 flash programs to the [micro:bit](https://microbit.org/). If you
 install Microflash after downloading a .hex file you will be able to
