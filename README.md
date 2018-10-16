@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/robert-ancell/microflash.svg?branch=master)](https://travis-ci.org/robert-ancell/microflash)
+[![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://github.com/robert-ancell/microflash/blob/master/COPYING)
 
 This is the source code to *Microflash* — a graphical application to
 flash programs to the [micro:bit](https://microbit.org/). If you
