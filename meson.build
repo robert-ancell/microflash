@@ -1,5 +1,5 @@
 project ('microflash', 'c',
-          meson_version: '>= 0.46.0')
+          meson_version: '>= 0.37.1')
 
 gnome = import ('gnome')
 i18n = import ('i18n')
