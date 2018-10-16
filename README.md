@@ -17,6 +17,9 @@ $ sudo apt update
 $ sudo apt install microflash
 ```
 
+There is also a `microflash-edge` PPA available if you want to get the
+latest builds.
+
 # Building from source
 
 Get the source:
