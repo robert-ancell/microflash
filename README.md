@@ -6,6 +6,8 @@ flash programs to the [micro:bit](https://microbit.org/). If you
 install Microflash after downloading a .hex file you will be able to
 download it to the micro:bit in one click.
 
+![Screenshot](https://raw.githubusercontent.com/robert-ancell/microflash/master/screenshot.png)
+
 # Installing
 
 On an Ubuntu 18.04 LTS machine enter the following:
