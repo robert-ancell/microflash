@@ -17,7 +17,7 @@ script:
   - docker exec $cid ninja -C _build
   - docker exec $cid ninja -C _build microflash-pot
   - docker exec $cid apt-get install -y curl
-  - docker exec $cid curl -X POST https://poeditor.com/api/ -F api_token="$POEDITOR_TOKEN" -F action="upload" -F id="217753" -F updating="terms" -F file=@"po/microflash.pot"
+  - docker exec $cid curl -X POST https://poeditor.com/api/ -F api_token="$POEDITOR_TOKEN" -F action="upload" -F id="217753" -F updating="terms" -F sync_terms="1" -F file=@"po/microflash.pot"
 
 #deploy:
 #  provider: launchpad
