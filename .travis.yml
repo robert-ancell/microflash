@@ -15,6 +15,9 @@ script:
   - docker exec $cid apt-get install -y --no-install-recommends gcc gettext libglib2.0-dev libgtk-3-dev libgudev-1.0-dev libjson-glib-dev meson
   - docker exec $cid meson _build
   - docker exec $cid ninja -C _build
+  - docker exec $cid ninja -C _build microflash-pot
+  - docker exec $cid apt-get install -y curl
+  - docker exec $cid curl -X POST https://poeditor.com/api/ -F api_token="$POEDITOR_TOKEN" -F action="upload" -F id="7717" -F updating="terms" -F file=@"po/microflash.pot"
 
 #deploy:
 #  provider: launchpad
