@@ -1,3 +1,72 @@
 msgid ""
 msgstr ""
+"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: Microflash\n"
+"Language: fr\n"
+
+#. Workarounds for:
+#. * https://gitlab.gnome.org/GNOME/gtk/merge_requests/376
+#. * https://gitlab.gnome.org/GNOME/gtk/merge_requests/380
+#: src/mf-program-dialog.c:35
+msgid "HEX Files"
+msgstr ""
+
+#: src/mf-program-dialog.c:37
+msgid "All Files"
+msgstr ""
+
+#: src/mf-program-dialog.ui:6
+msgid "Select Program"
+msgstr ""
+
+#: src/mf-program-dialog.ui:11
+msgid "Cancel"
+msgstr ""
+
+#: src/mf-program-dialog.ui:18
+msgid "Select"
+msgstr ""
+
+#: src/mf-window.ui:10
+msgid "Close"
+msgstr ""
+
+#: src/mf-window.ui:18
+msgid "Flash"
+msgstr ""
+
+#: src/mf-window.ui:44
+msgid "No micro:bit detected"
+msgstr ""
+
+#: src/mf-window.ui:57
+msgid "Please connect your micro:bit to this computer using a USB cable"
+msgstr ""
+
+#: microflash.appdata.xml:6 microflash.desktop:4
+msgid "Microflash"
+msgstr ""
+
+#: microflash.appdata.xml:7 microflash.desktop:5
+msgid "Flash programs to your micro:bit"
+msgstr ""
+
+#: microflash.appdata.xml:9
+msgid "A graphical application to flash programs to the micro:bit. If you install Microflash after downloading a .hex file you will be able to download it to the micro:bit in one click."
+msgstr ""
+
+#: microflash.desktop:6
+msgid "micro;bit;flash;program;download;usb"
+msgstr ""
+
+#: microflash.desktop:7
+msgid "microflash"
+msgstr "microflash"
+
+#: microflash.mime.xml:4
+msgid "Intel HEX file"
+msgstr ""
+
