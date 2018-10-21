@@ -3,19 +3,19 @@
   <template class="MfProgramDialog" parent="GtkFileChooserDialog">
     <child type="titlebar">
       <object class="GtkHeaderBar">
-        <property name="title" translatable="yes">Select Program</property>
+        <property name="title" translatable="yes" comments="Title of file chooser dialog when selecting a program to flash">Select Program</property>
         <property name="visible">True</property>
         <child>
           <object class="GtkButton" id="cancel_button">
             <property name="visible">True</property>
-            <property name="label" translatable="yes">Cancel</property>
+            <property name="label" translatable="yes" comments="Label on button that cancels file chooser dialog">Cancel</property>
           </object>
         </child>
         <child>
           <object class="GtkButton" id="select_button">
             <property name="visible">True</property>
             <property name="can_default">True</property>
-            <property name="label" translatable="yes">Select</property>
+            <property name="label" translatable="yes" comments="Label on button that selects requested program in file chooser dialog">Select</property>
           </object>
           <packing>
             <property name="pack-type">end</property>

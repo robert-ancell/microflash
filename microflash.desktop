@@ -1,8 +1,12 @@
 [Desktop Entry]
 Type=Application
+# Title of application
 Name=Microflash
+# One line description of application
 Comment=Flash programs to your micro:bit
-Keywords=micro;bit;flash;program;download;usb
+# Search terms for this application. Each term is separated by semicolons and it MUST end with a semicolon
+Keywords=micro;bit;flash;program;download;usb;
+# Name of icon used by application. PLEASE DO NOT TRANSLATE
 Icon=microflash
 Categories=Development;Education;
 MimeType=application/intel-hex;
