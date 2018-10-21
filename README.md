@@ -39,3 +39,4 @@ $ ./_build/src/microflash
 
 To contribute code to Microflash make a [pull request](https://github.com/robert-ancell/microflash/pulls).
 If you find issues please [report them](https://github.com/robert-ancell/microflash/issues).
+Please [contribute translations](https://poeditor.com/join/project/9hrDWqHfzU).
