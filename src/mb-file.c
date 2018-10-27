@@ -140,6 +140,14 @@ decode_hex_file (GFile *file, GCancellable *cancellable, gchar **header, GBytes 
        while (isspace (*record))
           record++;
 
+       if (record[0] == '\0') {
+           if (header != NULL)
+               *header = g_steal_pointer (&json_header);
+           if (source != NULL)
+               *source = g_bytes_new_take (g_steal_pointer (&text), text_length);
+           return TRUE;
+       }
+
        if (record[0] != ':') {
            g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
                         "Unexpected character '%c'", isprint (record[0]) ? record[0] : '?');
@@ -164,7 +172,7 @@ decode_hex_file (GFile *file, GCancellable *cancellable, gchar **header, GBytes 
        record += record_length;
 
        switch (record_type) {
-       case 0:
+       case 0: /* Data */
            /* PXT file record */
            if (byte_count == 16 && strncmp (record_data, "41140E2FB82FA2BB", 16) == 0) {
                json_header_address = address + 16;
@@ -185,13 +193,9 @@ decode_hex_file (GFile *file, GCancellable *cancellable, gchar **header, GBytes 
                    text[a - text_address] = byte;
            }
            break;
-       case 1:
-           if (header != NULL)
-               *header = g_steal_pointer (&json_header);
-           if (source != NULL)
-               *source = g_bytes_new_take (g_steal_pointer (&text), text_length);
-           return TRUE;
-       case 4:
+       case 1: /* End of File */
+           break;
+       case 4: /* Extended Linear Address */
            if (byte_count != 2) {
                g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
                             "Extended linear address wrong size (%d, expecting 2)", byte_count);
@@ -199,7 +203,7 @@ decode_hex_file (GFile *file, GCancellable *cancellable, gchar **header, GBytes 
            }
            address_offset = decode_integer_be (record_data, 0, 2) << 16;
            break;
-       case 5:
+       case 5: /* Start Linear Adress */
            if (byte_count != 4) {
                g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
                             "Start linear address wrong size (%d, expecting 4)", byte_count);
@@ -210,7 +214,7 @@ decode_hex_file (GFile *file, GCancellable *cancellable, gchar **header, GBytes 
        default:
            g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
                         "Unknown record type %d", record_type);
-           break;
+           return FALSE;
        }
     }
 }
