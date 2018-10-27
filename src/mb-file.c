@@ -229,6 +229,11 @@ load_header (MbFile *file)
         return;
     }
 
+    if (header == NULL) {
+        g_warning ("No PXT header detected");
+        return;
+    }
+
     g_autoptr(JsonParser) parser = json_parser_new ();
     if (!json_parser_load_from_data (parser, header, -1, &error)) {
         g_warning ("Failed to parse PXT header: %s", error->message);
