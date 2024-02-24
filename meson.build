@@ -1,5 +1,5 @@
 project ('microflash', 'c',
-          meson_version: '>= 0.37.1')
+          meson_version: '>= 0.41.0')
 
 gnome = import ('gnome')
 i18n = import ('i18n')
@@ -13,23 +13,20 @@ gudev_dep = dependency ('gudev-1.0')
 json_glib_dep = dependency ('json-glib-1.0')
 gtk_dep = dependency ('gtk+-3.0')
 
-i18n.merge_file ('appdata-file',
-                 input: 'microflash.appdata.xml',
+i18n.merge_file (input: 'microflash.appdata.xml',
                  output: 'microflash.appdata.xml',
                  install: true,
                  install_dir: join_paths (datadir, 'metainfo'),
                  po_dir: 'po')
 
-i18n.merge_file ('desktop-file',
-                 input: 'microflash.desktop',
+i18n.merge_file (input: 'microflash.desktop',
                  output: 'microflash.desktop',
                  install: true,
                  install_dir: join_paths (datadir, 'applications'),
                  po_dir: 'po',
                  type: 'desktop')
 
-i18n.merge_file ('mime-file',
-                 input: 'microflash.mime.xml',
+i18n.merge_file (input: 'microflash.mime.xml',
                  output: 'microflash.xml',
                  install: true,
                  install_dir: join_paths (datadir, 'mime', 'packages'),
